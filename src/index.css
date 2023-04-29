@@ -1,0 +1,11 @@
+.marker-btn {
+  background: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.marker-btn img {
+  width: 20px;
+  height: 20px;
+}
