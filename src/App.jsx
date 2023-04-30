@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Map, {Marker, Popup} from 'react-map-gl'
 import './App.css'
-import {policeData} from './data/police-service'
 import './mapbox-gl.css'
 
 function App() {
@@ -10,8 +9,20 @@ function App() {
     longitude: '-114.070390',
     zoom: 10,
   })
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    const fetchData = async (endpoint) => {
+      const response = await fetch(endpoint);
+      const data = await response.json();
+      setData(data);
+    }
+
+    fetchData('https://data.calgary.ca/resource/ap4r-bav3.json')
+      .catch(console.error);
+  },[])
+
+  console.log(data);
   const [selectedStation, setSelectedStation] = useState(null);
-  console.log(selectedStation);
 
   return (
     <div>
@@ -22,11 +33,11 @@ function App() {
         mapStyle="mapbox://styles/mapbox/streets-v9"
         style={{width: '100vw', height: '100vh'}}
         onMove={evt => setViewport(evt.viewState)}>
-        {policeData.features.map(station => (
+        {data.map(station => (
           <Marker
-            key={station.properties.name}
-            latitude={station.geometry.coordinates[1]}
-            longitude={station.geometry.coordinates[0]}>
+            key={station.name}
+            latitude={station.point.coordinates[1]}
+            longitude={station.point.coordinates[0]}>
             <button 
               className="marker-btn"
               onClick={(evt) => {
@@ -36,12 +47,12 @@ function App() {
           </Marker>
         ))}
         {selectedStation ? (
-          <Popup latitude={selectedStation.geometry.coordinates[1]} longitude={selectedStation.geometry.coordinates[0]}>
+          <Popup latitude={selectedStation.point.coordinates[1]} longitude={selectedStation.point.coordinates[0]}>
             <div>
-              <h2>{selectedStation.properties.name}</h2>
-              <p>{selectedStation.properties.info}<br/>
-                {selectedStation.properties.address}<br/>
-                {selectedStation.properties.station_ty}</p>
+              <h2>{selectedStation.name}</h2>
+              <p>{selectedStation.info}<br/>
+                {selectedStation.address}<br/>
+                {selectedStation.station_ty}</p>
             </div>
           </Popup>
         ) : null}
